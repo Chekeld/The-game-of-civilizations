@@ -10,13 +10,14 @@
 //using namespace std;
 
 const long long MAX_STEPS = 100000;
-const long long MAX_X = 675;// 3500; (test)
-const long long MAX_Y = 320;// 1700; (test)
-const short POS_N = 5;
 
-const long long PIXEL_S = 4; //5; (test)
-const long long WIND_S_X = MAX_X*PIXEL_S + 3*PIXEL_S; //1250; (test)
-const long long WIND_S_Y = MAX_Y*PIXEL_S + 25*PIXEL_S;
+const long long MAX_X = 675; //(675 -> base test) //(3500 -> stress test for pixel size = 1)
+const long long MAX_Y = 320; //(320 -> base test) //(1700 -> stress test for pixel size = 1)
+
+const long long PIXEL_S = 3; //Pixel Size
+
+const long long WIND_S_X = MAX_X * PIXEL_S + 3 * PIXEL_S;
+const long long WIND_S_Y = MAX_Y * PIXEL_S + 25 * PIXEL_S;
 
 const short S_V = 1; //начальное значение в циклах for перебора поля
 
@@ -33,7 +34,7 @@ void t_value(int t, short& t1, short& t2) {
     }
 }
 
-bool print_space(std::vector<std::vector<int>>& space, const bool& is_rand, const int& i, sf::RenderWindow& window, sf::Font& font, sf::RectangleShape& square, std::mt19937& gen, std::uniform_int_distribution<int>& dist) {
+bool print_space(std::vector<std::vector<int>>& space, const bool& is_rand, const int& i, const short& pos_f, sf::RenderWindow& window, sf::Font& font, sf::RectangleShape& square, std::mt19937& gen, std::uniform_int_distribution<int>& dist) {
     unsigned int t1v = 0;
     unsigned int t2v = 0;
 
@@ -50,10 +51,10 @@ bool print_space(std::vector<std::vector<int>>& space, const bool& is_rand, cons
     for (int y = S_V; y < MAX_Y; y++) {
         for (int x = S_V; x < MAX_X; x++) {
             if (is_rand == 1) {
-                if (x >= MAX_X / POS_N && x <= MAX_X - (MAX_X / POS_N) && y >= MAX_Y / POS_N && y <= MAX_Y - (MAX_Y / POS_N)) {
+                if (pos_f == 0) space[y][x] = dist(gen);
+                else if (pos_f != 0 && x >= MAX_X / pos_f && x <= MAX_X - (MAX_X / pos_f) && y >= MAX_Y / pos_f && y <= MAX_Y - (MAX_Y / pos_f)) {
                     space[y][x] = dist(gen);
                 }
-                //space[y][x] = dist(gen);
             }
             if (space[y][x] == 1) {
                 t1v++;
@@ -79,10 +80,10 @@ bool print_space(std::vector<std::vector<int>>& space, const bool& is_rand, cons
     txt.setPosition({ 0.f, ((float)MAX_Y) * PIXEL_S + add_pix });
     window.draw(txt);
     txt.setString("White: " + std::to_string(t1v));
-    txt.setPosition({ 0.f, ((float)MAX_Y + 6) * PIXEL_S + add_pix });
+    txt.setPosition({ 0.f, ((float)MAX_Y + 8) * PIXEL_S + add_pix });
     window.draw(txt);
     txt.setString("Red: " + std::to_string(t2v));
-    txt.setPosition({ 0.f, ((float)MAX_Y + 12) * PIXEL_S + add_pix });
+    txt.setPosition({ 0.f, ((float)MAX_Y + 16) * PIXEL_S + add_pix });
     window.draw(txt);
 
     window.display();
@@ -101,9 +102,6 @@ void check_rules(short& t1, short& t2, std::vector<std::vector<int>>& space, std
             if (t1 >= 2) { //birth
                 space2[y][x] = t;
             }
-            else { //added for release mode(test)
-                space2[y][x] = 0;
-            }
         }
         else { //eating
             space2[y][x] = t;
@@ -112,11 +110,55 @@ void check_rules(short& t1, short& t2, std::vector<std::vector<int>>& space, std
 }
 
 int main() {
-    std::cout << "-> The Game Of Civilizations <-\n" << "by the Ch \n" << "=======================================\n" << "-> Spaces In Spawn? (0 or 1): ";
-    bool no_spaces_in_spawn = 1; std::cin >> no_spaces_in_spawn;
-    std::cout << std::endl << "Seed (-1 if not): ";
-    int seed = 0; std::cin >> seed; //seed 0 is successful for (675x, 320y) (test)
-    std::cout << "\n";
+    std::cout << ">> The Game Of Civilizations <<" << std::endl << "by Chekeld"<< std::endl << std::endl << "=======================================" << std::endl << std::endl;
+
+    /* test
+    long long max_x = 0;
+    long long max_y = 0;
+    std::cout << "Max X Pixel (0 if not): ";
+    std::cin >> max_x;
+    if (max_x <= 0) {
+        max_x = 675; //(675 -> base test) //(3500 -> stress test for pixel size = 1)
+    }
+    std::cout << "Max Y Pixel (0 if not): ";
+    std::cin >> max_y;
+    if (max_y <= 0) {
+        max_y = 320; //(320 -> base test) //(1700 -> stress test for pixel size = 1)
+    }
+
+    long long MAX_X = max_x;
+    long long MAX_Y = max_y;
+    long long WIND_S_X = MAX_X * PIXEL_S + 3 * PIXEL_S;
+    long long WIND_S_Y = MAX_Y * PIXEL_S + 25 * PIXEL_S;
+    */
+
+    int seed = 0;
+    short pos_f = 0;
+
+    std::cout << "Is Random Test (1 - true or 0 - false): ";
+    bool rand_var; std::cin >> rand_var;
+    bool is_test_structure = 0;
+    if (rand_var) {
+        seed = -1;
+    }
+    else {
+        std::cout << "Create a test structure (1 - true or 0 - false): ";
+        std::cin >> is_test_structure;
+
+        if (!is_test_structure) {
+            std::cout << "Seed (-1 if not): ";
+            std::cin >> seed;
+            std::cout << "Position Factor (0 if not): ";
+            std::cin >> pos_f;
+        }
+    }
+
+    if (pos_f < 0) pos_f = 0;
+    else if (pos_f > 10) pos_f = 10;
+    else if (pos_f != 0 && pos_f < 3) pos_f = 3;
+
+    bool no_spaces_in_spawn = 0;
+    if(pos_f != 0) no_spaces_in_spawn = 1;
 
     sf::RenderWindow window( //window
         sf::VideoMode({WIND_S_X, WIND_S_Y}), 
@@ -133,27 +175,38 @@ int main() {
     if (seed == -1) {
         std::random_device rd; seed = rd(); //random start
     }
-    std::cout << "Seed: " << seed << std::endl;
+    std::cout << std::endl << "=======================================" << std::endl << std::endl << "Seed: " << seed << std::endl << "Pixels: x: " << MAX_X << " y: " << MAX_Y << std::endl << "Position Factor: " << pos_f << std::endl;
     std::mt19937 gen(seed++);
     std::uniform_int_distribution<int> dist(no_spaces_in_spawn, 2);
 
     std::vector<std::vector<int>> space(MAX_Y + 1, std::vector<int>(MAX_X + 1, 0));
     std::vector<std::vector<int>> space2(MAX_Y + 1, std::vector<int>(MAX_X + 1, 0));
-    print_space(space, 1, 0, window, font, square, gen, dist);
-    space2 = space;
 
-    /* old
-    while (window.isOpen()) {
-        if (const optional event = window.pollEvent()) {
+    if (!is_test_structure) {
+        print_space(space, 1, 0, pos_f, window, font, square, gen, dist);
+    }
+    else {
+        space[MAX_Y / 2][MAX_X / 2] = 1; space[MAX_Y / 2][MAX_X / 2 + 1] = 2; space[MAX_Y / 2][MAX_X / 2 + 2] = 2; space[MAX_Y / 2][MAX_X / 2 + 3] = 2; space[MAX_Y / 2][MAX_X / 2 + 4] = 1;
+        space[MAX_Y / 2 - 1][MAX_X / 2] = 2; space[MAX_Y / 2 - 1][MAX_X / 2 + 1] = 1; space[MAX_Y / 2 - 1][MAX_X / 2 + 2] = 1; space[MAX_Y / 2 - 1][MAX_X / 2 + 3] = 1; space[MAX_Y / 2 - 1][MAX_X / 2 + 4] = 2;
+    }
+
+    space2 = space;
+    
+    for (int i = 0; i < 120; i++) { //delay
+        while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
-                break;
+                return 0;
+            }
+            if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
+                if (key->code == sf::Keyboard::Key::Escape) {
+                    window.close();
+                    return 0;
+                }
             }
         }
+        wait(1);
     }
-    */
-
-    //wait(3000);
 
     for (long long i = 0; i < MAX_STEPS; i++) {
 
@@ -172,7 +225,7 @@ int main() {
 
         wait(1);
 
-        if (print_space(space, 0, i, window, font, square, gen, dist)) {
+        if (print_space(space, 0, i, pos_f, window, font, square, gen, dist)) {
             break;
         }
         for (int y = S_V; y < MAX_Y; y++) {
@@ -205,5 +258,6 @@ int main() {
     }
 
     window.close();
+
     return 0;
 }
