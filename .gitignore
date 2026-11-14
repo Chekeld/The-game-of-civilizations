@@ -43,7 +43,6 @@ bin/
 obj/
 
 # Временные файлы компилятора Visual Studio
-*.obj
 *.ilk
 *.pdb
 *.tlb
@@ -53,8 +52,6 @@ obj/
 *.rsp
 *.pgc
 *.pgd
-*.meta
-*.pch
 
 # Кэш Intellisense, базы данных кода и файлы сборки VS
 .vs/

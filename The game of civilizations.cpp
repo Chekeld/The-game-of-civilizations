@@ -14,10 +14,10 @@ const long long MAX_STEPS = 100000;
 const long long MAX_X = 675; //(675 -> base test) //(3500 -> stress test for pixel size = 1)
 const long long MAX_Y = 320; //(320 -> base test) //(1700 -> stress test for pixel size = 1)
 
-const long long PIXEL_S = 3; //Pixel Size
+const long long PIXEL_S = 2; //Pixel Size
 
 const long long WIND_S_X = MAX_X * PIXEL_S + 3 * PIXEL_S;
-const long long WIND_S_Y = MAX_Y * PIXEL_S + 25 * PIXEL_S;
+const long long WIND_S_Y = MAX_Y * PIXEL_S + 110;
 
 const short S_V = 1; //начальное значение в циклах for перебора поля
 
@@ -71,19 +71,20 @@ bool print_space(std::vector<std::vector<int>>& space, const bool& is_rand, cons
             }
         }
     }
-    //cout << "Step: " << i << endl;
-    //cout << "White: " << t1v << endl;
-    //cout << "Red: " << t2v << endl;
+
+    float text_y = ((float)MAX_Y) * PIXEL_S + add_pix;
 
     sf::Text txt(font);
     txt.setString("Step: " + std::to_string(i));
-    txt.setPosition({ 0.f, ((float)MAX_Y) * PIXEL_S + add_pix });
+    txt.setPosition({ 0.f, text_y });
     window.draw(txt);
+
     txt.setString("White: " + std::to_string(t1v));
-    txt.setPosition({ 0.f, ((float)MAX_Y + 8) * PIXEL_S + add_pix });
+    txt.setPosition({ 0.f, text_y + 35.f });
     window.draw(txt);
+
     txt.setString("Red: " + std::to_string(t2v));
-    txt.setPosition({ 0.f, ((float)MAX_Y + 16) * PIXEL_S + add_pix });
+    txt.setPosition({ 0.f, text_y + 70.f });
     window.draw(txt);
 
     window.display();
@@ -112,26 +113,6 @@ void check_rules(short& t1, short& t2, std::vector<std::vector<int>>& space, std
 int main() {
     std::cout << ">> The Game Of Civilizations <<" << std::endl << "by Chekeld"<< std::endl << std::endl << "=======================================" << std::endl << std::endl;
 
-    /* test
-    long long max_x = 0;
-    long long max_y = 0;
-    std::cout << "Max X Pixel (0 if not): ";
-    std::cin >> max_x;
-    if (max_x <= 0) {
-        max_x = 675; //(675 -> base test) //(3500 -> stress test for pixel size = 1)
-    }
-    std::cout << "Max Y Pixel (0 if not): ";
-    std::cin >> max_y;
-    if (max_y <= 0) {
-        max_y = 320; //(320 -> base test) //(1700 -> stress test for pixel size = 1)
-    }
-
-    long long MAX_X = max_x;
-    long long MAX_Y = max_y;
-    long long WIND_S_X = MAX_X * PIXEL_S + 3 * PIXEL_S;
-    long long WIND_S_Y = MAX_Y * PIXEL_S + 25 * PIXEL_S;
-    */
-
     int seed = 0;
     short pos_f = 0;
 
@@ -159,9 +140,10 @@ int main() {
 
     bool no_spaces_in_spawn = 0;
     if(pos_f != 0) no_spaces_in_spawn = 1;
+   
 
     sf::RenderWindow window( //window
-        sf::VideoMode({WIND_S_X, WIND_S_Y}), 
+        sf::VideoMode({WIND_S_X, WIND_S_Y}),
         "The Game Of Civilizations",
         sf::Style::Titlebar | sf::Style::Close
     );
@@ -213,11 +195,13 @@ int main() {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
+                wait(6000);
                 return 0;
             }
             if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
                 if (key->code == sf::Keyboard::Key::Escape) {
                     window.close();
+                    wait(6000);
                     return 0;
                 }
             }
@@ -258,6 +242,8 @@ int main() {
     }
 
     window.close();
+
+    wait(6000);
 
     return 0;
 }
